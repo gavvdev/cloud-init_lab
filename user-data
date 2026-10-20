@@ -1,18 +1,48 @@
 #cloud-config
 
 # Atualiza a lista de pacotes antes das instalações
-
+package_update: true
 
 # Cria um usuário administrador
-
+users:
+  - name: meu-usuario
+    gecos: Usuario do laboratorio DevOps
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: "ALL=(ALL) NOPASSWD:ALL"
+    lock_passwd: true
+    ssh_authorized_keys:
+      - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhmcGU2St9TYtLXdwgzWe2wzbqtoqnI7w6YHiQ5iZsA gabriela-cloud-init"
 
 # Instala os softwares declarativamente
-
+packages:
+  - docker.io
+  - nginx
 
 # Cria uma página personalizada
-
+write_files:
+  - path: /var/www/html/index.html
+    owner: www-data:www-data
+    permissions: "0644"
+    content: |
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+        <meta charset="UTF-8">
+        <title>Laboratório Cloud-Init</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 80px;">
+        <h1>Cloud-Init funcionando!</h1>
+        <p>Servidor provisionado automaticamente com Vagrant, Docker e Nginx.</p>
+        <p>Atividade de DevOps - Gabriela</p>
+      </body>
+      </html>
 
 # Executa comandos após as etapas de configuração
-
+runcmd:
+  - [systemctl, enable, --now, nginx]
+  - [systemctl, enable, --now, docker]
+  - [usermod, -aG, docker, meu-usuario]
 
 # Mensagem final registrada nos logs
+final_message: "Cloud-Init finalizado: usuario meu-usuario, Docker e Nginx configurados."
